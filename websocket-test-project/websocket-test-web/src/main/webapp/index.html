@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    </head>
+    <body>
+        <h1>CPU Usage</h1>
+        
+        <canvas id="cpuUsageChart" width="400" height="400"></canvas>
+        <div id="legend">
+        
+        </div>
+        
+        <script>
+            var data = {
+                labels: [],
+                datasets: [
+                    {
+                        label: "Sys",
+                        fillColor: "rgba(220,220,220,0.2)",
+                        strokeColor: "rgba(220,220,220,1)",
+                        pointColor: "rgba(220,220,220,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(220,220,220,1)",
+                        data: []
+                    },
+                    {
+                        label: "Usr",
+                        fillColor: "rgba(151,187,205,0.2)",
+                        strokeColor: "rgba(151,187,205,1)",
+                        pointColor: "rgba(151,187,205,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(151,187,205,1)",
+                        data: []
+                    },
+                    {                   
+                        label: "IoWait",
+                        fillColor: "rgba(200,87,5,0.2)",
+                        strokeColor: "rgba(200,87,5,1)",
+                        pointColor: "rgba(200,87,5,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(200,87,5,1)",
+                        data: []
+                    }
+                    
+                ]
+            };
+      
+            function formatDate(date) {
+                var seconds = date.getSeconds();
+                if (seconds.toString().length === 1) {
+                    seconds = "0" + seconds;
+                }
+                
+                var minutes = date.getMinutes();
+                if (minutes.toString().length === 1) {
+                    minutes = "0" + minutes;
+                }
+                return date.getHours() + ":" + minutes + ":" + seconds;
+            }
+        
+            var ctx = document.getElementById("cpuUsageChart").getContext("2d");
+            var myNewChart = new Chart(ctx).Line(data, {legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"><%if(datasets[i].label){%><%=datasets[i].label%><%}%></span></li><%}%></ul>"});
+            
+            document.getElementById("legend").innerHTML = myNewChart.generateLegend();
+            
+            var websocket = new WebSocket("ws://localhost:8080/websocket-test/cpu/all");
+            websocket.onmessage = function (event) {
+            
+                var dataJson = JSON.parse(event.data);
+                var timestamp = dataJson["timestamp"];
+                var cpuStatsCollection = dataJson["cpuStats"];
+
+                var d = new Date(0);
+                d.setUTCSeconds(timestamp / 1000) 
+                
+                var sys = null;
+                var usr = null;
+                var ioWait = null;
+                
+                for (var i = 0; i < cpuStatsCollection.length; i++) {
+                    var cpuStatsItem = cpuStatsCollection[i];
+                    if ("all" === cpuStatsItem["cpuId"]) {
+                        sys = cpuStatsItem["userTime"];
+                        usr = cpuStatsItem["systemTime"];
+                        ioWait = cpuStatsItem["ioWaitTime"];
+                        break;
+                    }
+                }
+
+                
+
+                myNewChart.addData([sys, usr, ioWait], formatDate(d));
+                myNewChart.update();
+                
+            }        
+            
+        </script>
+    </body>
+</html>
