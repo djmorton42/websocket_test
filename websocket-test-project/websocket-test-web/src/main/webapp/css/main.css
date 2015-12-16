@@ -1,0 +1,29 @@
+div.chart {
+    float:left;
+    height:230px;
+    width:200px;
+    border:1px solid #000000;
+}
+
+div.chart h3 {
+    font-size:small;
+    margin:0;
+    padding:0;
+}
+
+div.chart canvas {
+    height:200px;
+    width:200px;
+}
+
+li.sys {
+    color:#3cff33;
+}
+
+li.usr {
+    color:#97bbcd;
+}
+
+li.iowait {
+    color:#c85705;
+}

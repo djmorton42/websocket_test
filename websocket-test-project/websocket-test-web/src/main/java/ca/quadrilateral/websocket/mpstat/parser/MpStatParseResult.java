@@ -1,4 +1,4 @@
-package ca.quadrilateral.websocket;
+package ca.quadrilateral.websocket.mpstat.parser;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -9,7 +9,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import ca.quadrilateral.websocket.serialization.ZonedDateTimeToMillisSerializer;
+import ca.quadrilateral.websocket.stats.CpuStats;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -46,6 +47,22 @@ public class MpStatParseResult {
         
         return this;
     }
+    
+    public MpStatParseResult addCpuStats(final CpuStats cpuStats) {
+    	this.addCpuStats(cpuStats.getCpuId(), cpuStats.getUserTime(), cpuStats.getSystemTime(), cpuStats.getIoWaitTime());
+    	return this;
+    }
+    
+    public MpStatParseResult filter(final Set<String> cores) {
+    	final MpStatParseResult filteredResult = new MpStatParseResult();
+    	for (final CpuStats cpuStats : cpuStatsSet) {
+    		if (cores.contains(cpuStats.getCpuId())) {
+    			filteredResult.addCpuStats(cpuStats);
+    		}
+    	}
+    	
+    	return filteredResult;
+    }
 
     public ZonedDateTime getTimestamp() {
         return timestamp;
@@ -71,49 +88,6 @@ public class MpStatParseResult {
                 final double systemTime,
                 final double ioWaitTime) {
             throw new UnsupportedOperationException("This empty result is immutable!");
-        }
-    }
-    
-    @JsonAutoDetect(
-            fieldVisibility=Visibility.ANY, 
-            getterVisibility=Visibility.NONE, 
-            isGetterVisibility=Visibility.NONE, 
-            setterVisibility=Visibility.NONE)
-    public static class CpuStats {
-        private final String cpuId;
-        private final double userTime;
-        private final double systemTime;
-        private final double ioWaitTime;
-        
-        private CpuStats(
-                final String cpuId, 
-                final double userTime, 
-                final double systemTime, 
-                final double ioWaitTime) {
-            
-            this.cpuId = cpuId;
-            this.userTime = userTime;
-            this.systemTime = systemTime;
-            this.ioWaitTime = ioWaitTime;
-        }
-        
-        public static CpuStats of(
-                final String cpuId, 
-                final double userTime, 
-                final double systemTime, 
-                final double ioWaitTime) {
-            
-            return new CpuStats(cpuId, userTime, systemTime, ioWaitTime);
-        }
-        
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this)
-                .append("CpuID", cpuId)
-                .append("usr", userTime)
-                .append("sys", systemTime)
-                .append("ioWait", ioWaitTime)
-                .toString();
         }
     }
 }

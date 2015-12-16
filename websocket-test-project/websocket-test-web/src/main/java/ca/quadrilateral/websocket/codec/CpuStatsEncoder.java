@@ -1,24 +1,28 @@
-package ca.quadrilateral.websocket;
+package ca.quadrilateral.websocket.codec;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;
 
-import ca.quadrilateral.websocket.MpStatParseResult.CpuStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.quadrilateral.websocket.stats.CpuStats;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CpuStatsEncoder implements Encoder.Text<CpuStats> {
-
+	private static final Logger logger = LoggerFactory.getLogger(CpuStatsEncoder.class);
+		
     @Override
     public void init(final EndpointConfig config) {
-        
+    	logger.debug("Initializing CpuStatsEncoder");
     }
 
     @Override
     public void destroy() {
-        
+    	logger.debug("Terminating CpuStatsEncoder");
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ca.quadrilateral.websocket;
+package ca.quadrilateral.websocket.serialization;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
